@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { getAdminUser } from '@/lib/auth';
 import { getSiteSettings } from '@/lib/settings';
 import { dispatchTransactionalEmail, generateEmailTemplate } from '@/lib/email';
+import { STOCK_RELEASING_STATUS } from '@/lib/stock';
 
 export const dynamic = 'force-dynamic';
 
@@ -69,7 +70,7 @@ export async function PUT(request: Request) {
 
     const order = await prisma.order.findUnique({
       where: { id: orderId },
-      include: { deliveryShipment: true },
+      include: { deliveryShipment: true, items: true },
     });
 
     if (!order) {
@@ -84,13 +85,30 @@ export async function PUT(request: Request) {
     const previousFulfillment = order.fulfillmentStatus;
     const previousPayment = order.paymentStatus;
 
-    const updated = await prisma.order.update({
-      where: { id: order.id },
-      data: updateData,
-      include: {
-        items: true,
-        deliveryShipment: true,
-      },
+    // Annuler une commande rend sa marchandise au stock ; la « désannuler »
+    // la reprend. Fait dans la même transaction que le changement de statut
+    // pour qu'un échec ne laisse jamais le stock et la commande en désaccord.
+    const wasCancelled = previousFulfillment === STOCK_RELEASING_STATUS;
+    const willBeCancelled = (fulfillmentStatus || previousFulfillment) === STOCK_RELEASING_STATUS;
+    const stockDirection = !wasCancelled && willBeCancelled ? 1 : wasCancelled && !willBeCancelled ? -1 : 0;
+
+    const updated = await prisma.$transaction(async (tx) => {
+      if (stockDirection !== 0) {
+        for (const item of order.items) {
+          await tx.product.updateMany({
+            where: { id: item.productId },
+            data: { stock: { increment: stockDirection * item.quantity } },
+          });
+        }
+      }
+      return tx.order.update({
+        where: { id: order.id },
+        data: updateData,
+        include: {
+          items: true,
+          deliveryShipment: true,
+        },
+      });
     });
 
     // Record status history if changed

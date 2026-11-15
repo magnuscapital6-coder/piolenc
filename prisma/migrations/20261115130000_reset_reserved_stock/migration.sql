@@ -1,0 +1,12 @@
+-- Correction du double décompte du stock.
+--
+-- Jusqu'ici, chaque commande diminuait "stock" ET augmentait "reservedStock",
+-- alors que la quantité disponible se calcule comme "stock" - "reservedStock" :
+-- chaque article vendu était donc soustrait deux fois, et "reservedStock"
+-- n'était jamais remis à zéro (ni à l'expédition, ni à l'annulation).
+--
+-- Les commandes passées ont déjà été retirées de "stock" : les quantités
+-- accumulées dans "reservedStock" sont uniquement ce double décompte. On les
+-- remet à zéro ; "reservedStock" ne sert désormais qu'aux mises de côté
+-- manuelles saisies depuis l'administration (voir src/lib/stock.ts).
+UPDATE "Product" SET "reservedStock" = 0 WHERE "reservedStock" <> 0;

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { availableStock as getAvailableStock } from '@/lib/stock';
 
 export const dynamic = 'force-dynamic';
 
@@ -69,7 +70,7 @@ export async function POST(request: Request) {
       return { id, quantity, available: false, reason: 'NOT_FOUND' as const };
     }
 
-    const availableStock = Math.max(0, product.stock - product.reservedStock);
+    const availableStock = getAvailableStock(product);
     const priceTTC =
       product.promoPrice && product.promoPrice > 0 ? product.promoPrice : product.priceTTC;
     const base = { id, quantity, name: product.name, availableStock, priceTTC };

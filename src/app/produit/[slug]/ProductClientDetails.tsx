@@ -13,6 +13,7 @@ import {
   ShoppingBag,
   Star,
 } from 'lucide-react';
+import { availableStock } from '@/lib/stock';
 
 interface ImageCredit {
   file: string;
@@ -49,7 +50,8 @@ export default function ProductClientDetails({
   const [activeImage, setActiveImage] = useState(images[0] || PLACEHOLDER_IMAGE);
 
   const effectivePriceTTC = product.promoPrice && product.promoPrice > 0 ? product.promoPrice : product.priceTTC;
-  const isOutOfStock = product.stock <= 0 && !product.isPreorderAllowed;
+  const inStock = availableStock(product);
+  const isOutOfStock = inStock <= 0 && !product.isPreorderAllowed;
 
   const handleAddToCart = () => {
     if (isOutOfStock) return;
@@ -186,7 +188,7 @@ export default function ProductClientDetails({
               {isOutOfStock ? (
                 <span className="badge-error">Rupture temporaire</span>
               ) : (
-                <span className="badge-success">En stock ({product.stock} dispo)</span>
+                <span className="badge-success">En stock ({inStock} dispo)</span>
               )}
             </div>
           </div>

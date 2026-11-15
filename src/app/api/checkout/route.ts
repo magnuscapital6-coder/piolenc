@@ -5,6 +5,13 @@ import { getSiteSettings } from '@/lib/settings';
 import { calculateShippingFee } from '@/lib/pricing';
 import { dispatchTransactionalEmail, generateEmailTemplate } from '@/lib/email';
 import { getCurrentUser } from '@/lib/auth';
+import { availableStock as getAvailableStock } from '@/lib/stock';
+
+class StockConflictError extends Error {
+  constructor(public productName: string) {
+    super(`Stock épuisé pour ${productName}`);
+  }
+}
 
 export async function POST(request: Request) {
   try {
@@ -85,6 +92,9 @@ export async function POST(request: Request) {
     let totalWeightKg = 0;
 
     const orderItemsData: any[] = [];
+    // Mouvements de stock à appliquer dans la transaction (séparés des lignes
+    // de commande, dont la forme doit rester celle du modèle OrderItem).
+    const stockMoves: Array<{ productId: string; productName: string; quantity: number; allowsPreorder: boolean }> = [];
 
     for (const item of items) {
       const dbProduct = dbProductMap.get(item.productId);
@@ -109,7 +119,7 @@ export async function POST(request: Request) {
       }
 
       // Stock check
-      const availableStock = dbProduct.stock - dbProduct.reservedStock;
+      const availableStock = getAvailableStock(dbProduct);
 
       if (availableStock < requestedQty && !dbProduct.isPreorderAllowed) {
         return NextResponse.json(
@@ -132,6 +142,13 @@ export async function POST(request: Request) {
       calculatedVatTotal += lineVat;
       totalItemsCount += requestedQty;
       totalWeightKg += (dbProduct.weightKg || 900) * requestedQty;
+
+      stockMoves.push({
+        productId: dbProduct.id,
+        productName: dbProduct.name,
+        quantity: requestedQty,
+        allowsPreorder: dbProduct.isPreorderAllowed,
+      });
 
       orderItemsData.push({
         productId: dbProduct.id,
@@ -240,15 +257,28 @@ export async function POST(request: Request) {
     let order;
     try {
       order = await prisma.$transaction(async (tx) => {
-      // Reserve stock for products
-      for (const item of orderItemsData) {
-        await tx.product.update({
-          where: { id: item.productId },
-          data: {
-            stock: { decrement: item.quantity },
-            reservedStock: { increment: item.quantity },
-          },
-        });
+      // Sortie de stock : la quantité vendue n'est décomptée qu'une fois.
+      // `reservedStock` n'est plus incrémenté ici (voir src/lib/stock.ts) :
+      // il était déjà soustrait du disponible, chaque vente comptait double.
+      // Le contrôle et la sortie de stock sont faits dans la même requête SQL :
+      // deux clients qui commandent la dernière palette au même instant ne
+      // peuvent plus passer tous les deux (le second est refusé proprement).
+      for (const item of stockMoves) {
+        if (item.allowsPreorder) {
+          await tx.product.update({
+            where: { id: item.productId },
+            data: { stock: { decrement: item.quantity } },
+          });
+          continue;
+        }
+        const updatedRows = await tx.$executeRaw`
+          UPDATE "Product"
+          SET "stock" = "stock" - ${item.quantity}, "updatedAt" = NOW()
+          WHERE "id" = ${item.productId}
+            AND "stock" - "reservedStock" >= ${item.quantity}`;
+        if (updatedRows === 0) {
+          throw new StockConflictError(item.productName);
+        }
       }
 
       // Create Order
@@ -314,6 +344,12 @@ export async function POST(request: Request) {
         return newOrder;
       }, { maxWait: 15000, timeout: 30000 });
     } catch (error: any) {
+      if (error instanceof StockConflictError) {
+        return NextResponse.json(
+          { error: `Le stock de ${error.productName} vient d'être épuisé par une autre commande. Merci d'actualiser votre panier.` },
+          { status: 409 }
+        );
+      }
       // Course entre deux validations identiques : la contrainte d'unicité a
       // repéré la clé déjà utilisée, on renvoie la commande existante.
       if (error?.code === 'P2002' && idempotencyKey) {
