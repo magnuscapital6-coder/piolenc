@@ -508,8 +508,8 @@ export default function AdminProductsPage() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 xl:grid-cols-4 gap-4">
-          <div className="xl:col-span-3 bg-white rounded-xl border border-subtleBorder shadow-subtle overflow-hidden">
+        <div className="grid grid-cols-1 2xl:grid-cols-4 gap-4">
+          <div className="2xl:col-span-3 bg-white rounded-xl border border-subtleBorder shadow-subtle overflow-hidden">
             {loading ? (
               <div className="p-12 text-center text-xs text-secondaryText">Chargement du catalogue...</div>
             ) : products.length === 0 ? (
@@ -565,7 +565,7 @@ export default function AdminProductsPage() {
                                 className="w-12 h-12 object-cover rounded-lg border border-subtleBorder shrink-0"
                               />
                               <div className="min-w-0">
-                                <span className="block truncate max-w-xs">{prod.name}</span>
+                                <span className="block line-clamp-2 max-w-[16rem]" title={prod.name}>{prod.name}</span>
                                 <span className="text-[10px] text-secondaryText font-mono font-normal">
                                   Réf : {prod.reference}
                                 </span>
@@ -618,18 +618,22 @@ export default function AdminProductsPage() {
                           <td className="py-3.5 px-4 text-right whitespace-nowrap space-x-1.5">
                             <button
                               onClick={() => openEdit(prod)}
+                              title="Modifier"
+                              aria-label={`Modifier ${prod.name}`}
                               className="inline-flex items-center gap-1 px-2.5 py-1 border border-subtleBorder hover:bg-beige-100 text-primaryText rounded-lg font-medium text-[11px] transition"
                             >
                               <Pencil className="w-3 h-3" />
-                              <span>Modifier</span>
+                              <span className="lg:hidden 2xl:inline">Modifier</span>
                             </button>
                             <button
                               onClick={() => remove(prod)}
                               disabled={busyId === prod.id}
+                              title="Supprimer"
+                              aria-label={`Supprimer ${prod.name}`}
                               className="inline-flex items-center gap-1 px-2.5 py-1 border border-red-200 hover:bg-red-50 text-statusError rounded-lg font-medium text-[11px] transition disabled:opacity-50"
                             >
                               <Trash2 className="w-3 h-3" />
-                              <span>Supprimer</span>
+                              <span className="lg:hidden 2xl:inline">Supprimer</span>
                             </button>
                           </td>
                         </tr>

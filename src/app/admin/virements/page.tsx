@@ -262,7 +262,7 @@ export default function WireReconciliationPage() {
         {selectedOrder && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-forest-950/60 backdrop-blur-xs" onClick={() => setSelectedOrder(null)} />
-            <div className="relative bg-white rounded-xl max-w-lg w-full p-6 shadow-elevated border border-subtleBorder z-10 space-y-4">
+            <div className="relative bg-white rounded-xl max-w-lg w-full p-4 sm:p-6 shadow-elevated border border-subtleBorder z-10 space-y-4 max-h-[90dvh] overflow-y-auto">
               <div className="flex justify-between items-start pb-3 border-b border-subtleBorder">
                 <div>
                   <h3 className="text-base font-bold font-heading text-primaryText">

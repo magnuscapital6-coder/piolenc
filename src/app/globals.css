@@ -179,3 +179,91 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #8A6445;
 }
+
+/* ---------------------------------------------------------------------------
+   Tableaux de l'administration
+   Sur téléphone et tablette, chaque ligne devient une carte « libellé : valeur »
+   au lieu d'un tableau 2 à 3 fois plus large que l'écran (colonnes coupées).
+   Les libellés viennent des en-têtes de colonnes, recopiés automatiquement dans
+   data-label par AdminLayout. Un tableau peut garder son affichage classique
+   avec la classe `keep-table`.
+   --------------------------------------------------------------------------- */
+@media (max-width: 1023.98px) {
+  .admin-main table:not(.keep-table),
+  .admin-main table:not(.keep-table) > tbody,
+  .admin-main table:not(.keep-table) > tbody > tr,
+  .admin-main table:not(.keep-table) > tbody > tr > td {
+    display: block;
+    width: 100%;
+  }
+  .admin-main table:not(.keep-table) > thead {
+    display: none;
+  }
+  .admin-main table:not(.keep-table) > tbody {
+    padding: 0.5rem;
+  }
+  .admin-main table:not(.keep-table) > tbody > tr {
+    border: 1px solid #e7e0d6;
+    border-radius: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    margin-bottom: 0.5rem;
+    background: #fff;
+  }
+  .admin-main table:not(.keep-table) > tbody > tr:last-child {
+    margin-bottom: 0;
+  }
+  /* Bloc + libellé flottant à gauche : le contenu reste aligné à droite et
+     ses éléments en bloc (nom puis e-mail, numéro puis date) s'empilent au
+     lieu de se serrer côte à côte. */
+  .admin-main table:not(.keep-table) > tbody > tr > td {
+    display: block;
+    overflow: hidden;
+    padding: 0.375rem 0 !important;
+    text-align: right;
+    white-space: normal !important;
+    max-width: none !important;
+    overflow-wrap: anywhere;
+    border: 0;
+  }
+  .admin-main table:not(.keep-table) > tbody > tr > td + td {
+    border-top: 1px dashed #efe9e1;
+  }
+  .admin-main table:not(.keep-table) > tbody > tr > td::before {
+    content: attr(data-label);
+    float: left;
+    margin-right: 0.75rem;
+    max-width: 45%;
+    text-align: left;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #6b6258;
+    padding-top: 0.125rem;
+  }
+  /* Cellule sans en-tête (case à cocher, actions, message « aucun résultat ») */
+  .admin-main table:not(.keep-table) > tbody > tr > td[data-label='']::before {
+    display: none;
+  }
+  .admin-main table:not(.keep-table) > tbody > tr > td[colspan] {
+    text-align: center;
+  }
+}
+
+/* Écran large : les cellules peuvent passer à la ligne (sauf la colonne
+   d'actions), et l'espacement est un peu réduit, pour que les tableaux tiennent
+   dans la largeur au lieu de cacher leurs dernières colonnes. */
+@media (min-width: 1024px) {
+  .admin-main table:not(.keep-table) th,
+  .admin-main table:not(.keep-table) td {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+  .admin-main table:not(.keep-table) td:not(:last-child) {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  .admin-main table:not(.keep-table) th {
+    white-space: nowrap;
+  }
+}
