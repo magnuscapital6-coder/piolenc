@@ -14,6 +14,7 @@ import {
   Paintbrush,
   FileSpreadsheet,
 } from 'lucide-react';
+import { fulfillmentLabel } from '@/lib/order-status';
 
 export const dynamic = 'force-dynamic';
 
@@ -202,7 +203,7 @@ export default async function AdminDashboardPage() {
                       </td>
                       <td className="py-3 px-4">
                         <span className="badge-neutral text-[10px]">
-                          {order.fulfillmentStatus}
+                          {fulfillmentLabel(order.fulfillmentStatus)}
                         </span>
                       </td>
                       <td className="py-3 px-4 text-right">
@@ -226,7 +227,7 @@ export default async function AdminDashboardPage() {
             <div className="bg-white p-5 rounded-xl border border-subtleBorder shadow-subtle space-y-3">
               <div className="flex items-center space-x-2 text-sm font-medium font-poppins text-primaryText">
                 <AlertTriangle className="w-4 h-4 text-statusWarning" />
-                <h3>Surveillance des stocks</h3>
+                <h3 className="text-sm font-medium">Surveillance des stocks</h3>
               </div>
 
               <div className="space-y-2.5">

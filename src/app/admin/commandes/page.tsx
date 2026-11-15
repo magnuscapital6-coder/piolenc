@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import AdminLayout from '@/components/AdminLayout';
 import { formatPrice } from '@/lib/pricing';
+import { fulfillmentLabel } from '@/lib/order-status';
 import {
   ShoppingBag,
   Search,
@@ -68,22 +69,7 @@ export default function AdminOrdersPage() {
     }
   };
 
-  const getFulfillmentLabel = (status: string) => {
-    switch (status) {
-      case 'ORDER_CREATED': return 'Commande reçue';
-      case 'VALIDATED': return 'Validée';
-      case 'IN_PREPARATION': return 'En préparation';
-      case 'READY_FOR_SHIPPING': return 'Prête à expédier';
-      case 'SHIPPED': return 'Expédiée';
-      case 'IN_TRANSIT': return 'En transit';
-      case 'OUT_FOR_DELIVERY': return 'En cours de livraison';
-      case 'DELIVERY_DELAYED': return 'Livraison retardée';
-      case 'DELIVERED': return 'Livrée';
-      case 'CANCELLED': return 'Annulée';
-      case 'INCIDENT': return 'Incident';
-      default: return status;
-    }
-  };
+  const getFulfillmentLabel = fulfillmentLabel;
 
   return (
     <AdminLayout>

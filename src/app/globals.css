@@ -187,8 +187,16 @@
    Les libellés viennent des en-têtes de colonnes, recopiés automatiquement dans
    data-label par AdminLayout. Un tableau peut garder son affichage classique
    avec la classe `keep-table`.
+
+   Le basculement dépend de la place réellement disponible à côté du menu
+   (requête de conteneur), pas de la largeur de l'écran : menu déplié, les
+   cartes arrivent un peu plus tôt ; menu réduit, le tableau complet revient.
    --------------------------------------------------------------------------- */
-@media (max-width: 1023.98px) {
+.admin-main {
+  container-type: inline-size;
+  container-name: admin;
+}
+@container admin (max-width: 959.98px) {
   .admin-main table:not(.keep-table),
   .admin-main table:not(.keep-table) > tbody,
   .admin-main table:not(.keep-table) > tbody > tr,
@@ -250,10 +258,10 @@
   }
 }
 
-/* Écran large : les cellules peuvent passer à la ligne (sauf la colonne
-   d'actions), et l'espacement est un peu réduit, pour que les tableaux tiennent
-   dans la largeur au lieu de cacher leurs dernières colonnes. */
-@media (min-width: 1024px) {
+/* Place suffisante : tableau classique, cellules sur plusieurs lignes (sauf la
+   colonne d'actions) et espacement un peu réduit, pour que les tableaux
+   tiennent dans la largeur au lieu de cacher leurs dernières colonnes. */
+@container admin (min-width: 960px) {
   .admin-main table:not(.keep-table) th,
   .admin-main table:not(.keep-table) td {
     padding-left: 0.75rem;
