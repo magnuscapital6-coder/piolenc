@@ -6,8 +6,13 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { PLACEHOLDER_IMAGE } from '@/lib/images';
 import { ArrowRight } from 'lucide-react';
+import { buildPageMetadata } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
+
+export async function generateMetadata() {
+  return buildPageMetadata('/categories');
+}
 
 export default async function CategoriesPage() {
   const settings = await getSiteSettings();

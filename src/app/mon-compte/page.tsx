@@ -11,8 +11,11 @@ import {
   Truck,
   LogOut,
 } from 'lucide-react';
+import { privatePageMetadata } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
+
+export const metadata = privatePageMetadata('Mon compte');
 
 export default async function CustomerAccountPage() {
   const user = await getCurrentUser();

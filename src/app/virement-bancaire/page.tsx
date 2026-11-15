@@ -4,6 +4,11 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { getSiteSettings } from '@/lib/settings';
 import { ShieldCheck, CreditCard, Lock, ArrowRight } from 'lucide-react';
+import { buildPageMetadata } from '@/lib/seo';
+
+export async function generateMetadata() {
+  return buildPageMetadata('/virement-bancaire');
+}
 
 export default async function WireTransferInfoPage() {
   const settings = await getSiteSettings();

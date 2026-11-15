@@ -3,6 +3,11 @@ import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Home, Flame, Wind, ArrowRight } from 'lucide-react';
+import { buildPageMetadata } from '@/lib/seo';
+
+export async function generateMetadata() {
+  return buildPageMetadata('/guides/stockage');
+}
 
 export default function StorageGuidePage() {
   return (

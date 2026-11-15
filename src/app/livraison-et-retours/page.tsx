@@ -3,6 +3,11 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { applySiteSettingsToText, getSiteSettings } from '@/lib/settings';
 import { Truck, AlertTriangle, ShieldCheck } from 'lucide-react';
+import { buildPageMetadata } from '@/lib/seo';
+
+export async function generateMetadata() {
+  return buildPageMetadata('/livraison-et-retours');
+}
 
 export default async function DeliveryPolicyPage() {
   const settings = await getSiteSettings();

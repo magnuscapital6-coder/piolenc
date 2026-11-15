@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { prisma } from '@/lib/prisma';
 import { getSiteUrl } from '@/lib/site-url';
+import { getSeoSettings } from '@/lib/seo';
 
 // Le plan de site lit la base à chaque appel : une fiche retirée du catalogue
 // disparaît donc du plan dès le prochain passage du robot, sans attendre une
@@ -41,6 +42,10 @@ const PUBLIC_PAGES: Array<{ path: string; priority: number; changeFrequency: Cha
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl = getSiteUrl();
+  const seo = await getSeoSettings();
+  // Une page « masquée de Google » dans /admin/seo porte noindex : l'annoncer
+  // dans le plan de site serait contradictoire (erreur dans Search Console).
+  const visiblePages = PUBLIC_PAGES.filter((page) => !seo.pageMeta[page.path]?.noindex);
 
   // Seuls les produits actifs sont annoncés : une fiche désactivée renvoie une
   // page 404 (voir src/app/produit/[slug]/page.tsx) et n'a donc plus rien à
@@ -53,7 +58,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   });
 
   return [
-    ...PUBLIC_PAGES.map((page) => ({
+    ...visiblePages.map((page) => ({
       url: `${siteUrl}${page.path}`,
       changeFrequency: page.changeFrequency,
       priority: page.priority,

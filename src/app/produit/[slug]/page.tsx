@@ -6,6 +6,17 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import ProductClientDetails from './ProductClientDetails';
 import imageCreditsRegistry from '@/lib/product-image-credits.json';
+import type { Metadata } from 'next';
+import {
+  PRIVATE_ROBOTS,
+  absoluteUrl,
+  defaultShareImage,
+  getSeoSettings,
+  robotsFor,
+  sharedOpenGraph,
+} from '@/lib/seo';
+import { productDescription, productImageUrls, productJsonLd } from '@/lib/product-seo';
+import { JsonLd, breadcrumbJsonLd } from '@/lib/structured-data';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,6 +45,41 @@ function getImageCredits(slug: string, images: string[]): ImageCreditRow[] {
     .filter((image): image is ImageCreditRow => Boolean(image));
 }
 
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const [product, seo, settings] = await Promise.all([
+    prisma.product.findUnique({ where: { slug } }),
+    getSeoSettings(),
+    getSiteSettings(),
+  ]);
+  if (!product || !product.isActive) return { title: 'Produit introuvable', robots: PRIVATE_ROBOTS };
+
+  const title = (product.seoTitle || product.name).trim();
+  const description = productDescription(product);
+  const url = absoluteUrl(`/produit/${product.slug}`);
+  const images = productImageUrls(product);
+  const shareImages = images.length ? images.slice(0, 4) : [defaultShareImage(seo, settings)];
+
+  return {
+    title,
+    description,
+    alternates: { canonical: url },
+    openGraph: {
+      ...sharedOpenGraph(seo, settings),
+      url,
+      title: `${title} | ${settings.siteName}`,
+      description,
+      images: shareImages.map((src) => ({ url: src, alt: product.name })),
+    },
+    twitter: { card: 'summary_large_image', title, description, images: shareImages },
+    robots: robotsFor(seo.allowIndexing),
+  };
+}
 
 export default async function ProductDetailPage({
   params,
@@ -67,8 +113,24 @@ export default async function ProductDetailPage({
   }
   const imageCredits = getImageCredits(slug, productImages);
 
+  const seo = await getSeoSettings();
+  const structuredData = [
+    productJsonLd(product, {
+      brand: seo.merchantBrand || settings.companyName || settings.siteName,
+      sellerName: settings.companyName || settings.siteName,
+      categoryName: product.category?.name,
+      reviews: product.reviews,
+    }),
+    breadcrumbJsonLd([
+      { name: 'Accueil', path: '/' },
+      { name: 'Boutique', path: '/boutique' },
+      { name: product.name, path: `/produit/${product.slug}` },
+    ]),
+  ];
+
   return (
     <>
+      <JsonLd data={structuredData} />
       <Navbar siteName={settings.siteName} phone={settings.companyPhone} slogan={settings.slogan} />
 
       {/* `min-w-0` est nécessaire : la colonne flex parente donnerait sinon à ce

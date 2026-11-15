@@ -2,6 +2,11 @@ import React from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import ShippingEstimator from '@/components/ShippingEstimator';
+import { buildPageMetadata } from '@/lib/seo';
+
+export async function generateMetadata() {
+  return buildPageMetadata('/calculateurs/livraison');
+}
 
 export default function ShippingCalculatorPage() {
   return (

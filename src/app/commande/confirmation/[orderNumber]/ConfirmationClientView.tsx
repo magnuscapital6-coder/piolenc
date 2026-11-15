@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { formatPrice } from '@/lib/pricing';
+import { trackPurchase } from '@/lib/conversion-tracking';
 import {
   CheckCircle2,
   Copy,
@@ -23,6 +24,11 @@ export default function ConfirmationClientView({
   siteSettings,
 }: ConfirmationClientViewProps) {
   const [copiedField, setCopiedField] = useState<string | null>(null);
+
+  // Vente transmise à Google Ads / Analytics (une seule fois par commande).
+  useEffect(() => {
+    trackPurchase(order);
+  }, [order]);
 
   const copyToClipboard = (text: string, fieldName: string) => {
     navigator.clipboard.writeText(text);

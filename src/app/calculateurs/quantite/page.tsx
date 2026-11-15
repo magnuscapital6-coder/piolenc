@@ -2,6 +2,11 @@ import React from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import QuantityCalculator from '@/components/QuantityCalculator';
+import { buildPageMetadata } from '@/lib/seo';
+
+export async function generateMetadata() {
+  return buildPageMetadata('/calculateurs/quantite');
+}
 
 export default function QuantityCalculatorPage() {
   return (

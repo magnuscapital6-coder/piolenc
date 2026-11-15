@@ -4,6 +4,11 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { getSiteSettings } from '@/lib/settings';
 import { TreePine, Award, Truck, ShieldCheck, HeartHandshake, ArrowRight } from 'lucide-react';
+import { buildPageMetadata } from '@/lib/seo';
+
+export async function generateMetadata() {
+  return buildPageMetadata('/a-propos');
+}
 
 export default async function AboutPage() {
   const settings = await getSiteSettings();

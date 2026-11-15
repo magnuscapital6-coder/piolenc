@@ -46,7 +46,7 @@ export default function CookieBanner() {
             Gestion de la confidentialité
           </h4>
           <p className="text-secondaryText leading-relaxed">
-            Nous utilisons des cookies strictement nécessaires au fonctionnement du panier et à la sécurisation des commandes, conformément à la réglementation européenne RGPD.
+            Nous utilisons des cookies nécessaires au fonctionnement du panier et à la sécurisation des commandes. Avec votre accord, nous utilisons aussi des cookies de mesure d&apos;audience et de publicité (Google) pour améliorer le site et nos annonces. Vous pouvez refuser sans conséquence sur vos achats.
           </p>
           <div className="mt-2">
             <Link href="/cookies" className="text-forest hover:underline font-medium">

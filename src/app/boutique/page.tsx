@@ -7,9 +7,15 @@ import Footer from '@/components/Footer';
 import { formatPrice } from '@/lib/pricing';
 import { PLACEHOLDER_IMAGE } from '@/lib/images';
 import { Filter, ArrowRight } from 'lucide-react';
+import { buildPageMetadata } from '@/lib/seo';
+import { availableStock } from '@/lib/stock';
 
 export const dynamic = 'force-dynamic';
 
+
+export async function generateMetadata() {
+  return buildPageMetadata('/boutique');
+}
 
 export default async function ShopPage({
   searchParams,
@@ -198,7 +204,7 @@ export default async function ShopPage({
                             <span className="text-[10px] text-secondaryText block">TTC / {prod.unit}</span>
                           </div>
                           <span className="badge-success text-[11px]">
-                            {prod.stock > 0 ? `${prod.stock} disponibles` : 'Rupture'}
+                            {availableStock(prod) > 0 ? `${availableStock(prod)} disponibles` : 'Rupture'}
                           </span>
                         </div>
 

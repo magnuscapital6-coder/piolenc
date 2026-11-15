@@ -5,6 +5,12 @@ import { generateThemeCss } from '@/lib/colors';
 import { CartProvider } from '@/context/CartContext';
 import CartDrawer from '@/components/CartDrawer';
 import CookieBanner from '@/components/CookieBanner';
+import ConsentBridge from '@/components/ConsentBridge';
+import { GoogleTagsHead, GoogleTagManagerNoscript } from '@/components/GoogleTags';
+import { defaultShareImage, getSeoSettings, robotsFor, sharedOpenGraph } from '@/lib/seo';
+import { getSiteUrl } from '@/lib/site-url';
+import { renderHeadSnippet } from '@/lib/html-snippet';
+import { JsonLd, organizationJsonLd, websiteJsonLd } from '@/lib/structured-data';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,15 +29,39 @@ function resolveFavicon(settingsFaviconUrl?: string | null): string {
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-  const settings = await getSiteSettings();
+  const [settings, seo] = await Promise.all([getSiteSettings(), getSeoSettings()]);
   const description = applySiteSettingsToText(settings.seoDescription, settings);
   const favicon = resolveFavicon(settings.faviconUrl);
+  // Le titre SEO saisi dans la Personnalisation était enregistré mais jamais
+  // utilisé : c'est lui qui devient le titre de l'accueil dans Google.
+  const homeTitle =
+    applySiteSettingsToText(settings.seoTitle, settings).trim() || `${settings.siteName} | ${settings.slogan}`;
+
+  const other: Record<string, string> = {};
+  if (seo.bingSiteVerification) other['msvalidate.01'] = seo.bingSiteVerification;
+  if (seo.facebookDomainVerification) other['facebook-domain-verification'] = seo.facebookDomainVerification;
+
   return {
+    metadataBase: new URL(getSiteUrl()),
     title: {
-      default: `${settings.siteName} | ${settings.slogan}`,
+      default: homeTitle,
       template: `%s | ${settings.siteName}`,
     },
     description,
+    applicationName: settings.siteName,
+    openGraph: { ...sharedOpenGraph(seo, settings), title: homeTitle, description, url: getSiteUrl() },
+    twitter: {
+      card: 'summary_large_image',
+      title: homeTitle,
+      description,
+      images: [defaultShareImage(seo, settings)],
+    },
+    robots: robotsFor(seo.allowIndexing),
+    verification: {
+      ...(seo.googleSiteVerification ? { google: seo.googleSiteVerification } : {}),
+      ...(Object.keys(other).length ? { other } : {}),
+    },
+    formatDetection: { telephone: false },
     icons: {
       icon: [
         { url: favicon },
@@ -50,7 +80,7 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const settings = await getSiteSettings();
+  const [settings, seo] = await Promise.all([getSiteSettings(), getSeoSettings()]);
   const dynamicThemeCss = generateThemeCss(
     settings.primaryColor,
     settings.secondaryColor,
@@ -66,13 +96,25 @@ export default async function RootLayout({
           id="dynamic-brand-theme"
           dangerouslySetInnerHTML={{ __html: dynamicThemeCss }}
         />
+        {/* Balises Google et code libre saisis dans /admin/seo. */}
+        <GoogleTagsHead seo={seo} />
+        {renderHeadSnippet(seo.customHeadCode)}
       </head>
       <body className="flex flex-col min-h-screen">
+        <GoogleTagManagerNoscript seo={seo} />
+        {seo.customBodyStartCode && (
+          <div id="custom-body-start" style={{ display: 'contents' }} dangerouslySetInnerHTML={{ __html: seo.customBodyStartCode }} />
+        )}
+        <JsonLd data={[organizationJsonLd(settings, seo), websiteJsonLd(settings)]} />
         <CartProvider>
           {children}
           <CartDrawer />
           <CookieBanner />
         </CartProvider>
+        <ConsentBridge />
+        {seo.customBodyEndCode && (
+          <div id="custom-body-end" style={{ display: 'contents' }} dangerouslySetInnerHTML={{ __html: seo.customBodyEndCode }} />
+        )}
       </body>
     </html>
   );

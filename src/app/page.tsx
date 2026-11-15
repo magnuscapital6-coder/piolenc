@@ -20,8 +20,13 @@ import {
   Warehouse,
   Check,
 } from 'lucide-react';
+import { buildPageMetadata } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
+
+export async function generateMetadata() {
+  return buildPageMetadata('/');
+}
 
 export default async function HomePage() {
   const settings = await getSiteSettings();

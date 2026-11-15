@@ -2,6 +2,11 @@ import React from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { applySiteSettingsToText, getSiteSettings } from '@/lib/settings';
+import { buildPageMetadata } from '@/lib/seo';
+
+export async function generateMetadata() {
+  return buildPageMetadata('/cookies');
+}
 
 export default async function CookiePolicyPage() {
   const settings = await getSiteSettings();

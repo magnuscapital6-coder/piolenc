@@ -4,6 +4,11 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { HUMIDITY_LEVELS } from '@/lib/constants';
 import { Droplet, ArrowRight } from 'lucide-react';
+import { buildPageMetadata } from '@/lib/seo';
+
+export async function generateMetadata() {
+  return buildPageMetadata('/guides/humidite');
+}
 
 export default function HumidityGuidePage() {
   return (

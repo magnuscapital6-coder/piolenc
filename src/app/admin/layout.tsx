@@ -1,6 +1,10 @@
 import React from 'react';
 import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/lib/auth';
+import { privatePageMetadata } from '@/lib/seo';
+
+// Le backoffice n'a rien à faire dans Google (il est aussi fermé par robots.txt).
+export const metadata = privatePageMetadata('Administration');
 
 export const dynamic = 'force-dynamic';
 

@@ -4,6 +4,11 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { WOOD_SPECIES } from '@/lib/constants';
 import { Flame, ArrowRight } from 'lucide-react';
+import { buildPageMetadata } from '@/lib/seo';
+
+export async function generateMetadata() {
+  return buildPageMetadata('/guides/essences');
+}
 
 export default function WoodSpeciesGuidePage() {
   return (

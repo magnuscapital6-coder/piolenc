@@ -494,3 +494,48 @@ model CustomerReview {
   product         Product?  @relation(fields: [productId], references: [id], onDelete: SetNull)
   order           Order?    @relation(fields: [orderId], references: [id], onDelete: SetNull)
 }
+
+// Référencement et outils Google, pilotés depuis /admin/seo. Table à une seule
+// ligne (id "default-seo"), séparée de SiteSetting : l'enregistrement de la
+// page de personnalisation réécrit toute la ligne SiteSetting, il ne doit pas
+// pouvoir effacer un identifiant Google ou un code de vérification.
+model SeoSetting {
+  id                         String   @id @default("default-seo")
+
+  // Indexation : désactivée, toutes les pages portent `noindex` (site en travaux).
+  allowIndexing              Boolean  @default(true)
+  // Image de partage par défaut (Facebook, WhatsApp, LinkedIn…), 1200×630 conseillé.
+  defaultOgImageUrl          String   @default("")
+  // Type schema.org de l'entreprise annoncée aux moteurs (Store, LocalBusiness…).
+  organizationType           String   @default("Store")
+
+  // Codes de vérification de propriété (contenu de la balise meta seul).
+  googleSiteVerification     String   @default("")
+  bingSiteVerification       String   @default("")
+  facebookDomainVerification String   @default("")
+
+  // Balises Google : GTM-XXXX, G-XXXX, AW-XXXX et libellé de conversion achat.
+  googleTagManagerId         String   @default("")
+  googleAnalyticsId          String   @default("")
+  googleAdsId                String   @default("")
+  googleAdsConversionLabel   String   @default("")
+  // Mode consentement Google v2 : rien n'est mesuré avant « Accepter » (RGPD).
+  requireConsent             Boolean  @default(true)
+
+  // Google Merchant Center : flux produits publié sur /flux/google-merchant.xml.
+  merchantCenterId           String   @default("")
+  merchantFeedEnabled        Boolean  @default(true)
+  merchantBrand              String   @default("")
+  merchantGoogleCategory     String   @default("")
+
+  // Code libre collé tel que fourni par Google ou un autre outil.
+  customHeadCode             String   @default("")
+  customBodyStartCode        String   @default("")
+  customBodyEndCode          String   @default("")
+
+  // Titre, description et indexation par page publique (JSON { "/chemin": {...} }).
+  pageMeta                   String   @default("{}")
+
+  updatedAt                  DateTime @updatedAt
+  createdAt                  DateTime @default(now())
+}

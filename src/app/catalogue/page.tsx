@@ -8,8 +8,14 @@ import TrustBadges from '@/components/TrustBadges';
 import { formatPrice } from '@/lib/pricing';
 import { PLACEHOLDER_IMAGE } from '@/lib/images';
 import { ArrowRight } from 'lucide-react';
+import { buildPageMetadata } from '@/lib/seo';
+import { availableStock } from '@/lib/stock';
 
 export const dynamic = 'force-dynamic';
+
+export async function generateMetadata() {
+  return buildPageMetadata('/catalogue');
+}
 
 export default async function CatalogPage() {
   const settings = await getSiteSettings();
@@ -104,7 +110,7 @@ export default async function CatalogPage() {
                       <span className="text-[11px] text-secondaryText block">TTC / palette</span>
                     </div>
                     <span className="badge-success text-[11px]">
-                      {prod.stock} palettes disponibles
+                      {availableStock(prod)} palettes disponibles
                     </span>
                   </div>
 
